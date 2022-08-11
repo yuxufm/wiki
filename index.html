@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wiki</title>
+    <link rel="stylesheet" href="./assets/css/index.css" />
+</head>
+
+<body>
+    <div class="flex flex-row">
+        <!-- sidebar -->
+        <div id="sidebar" class="fixed overflow-y-auto bg-stone-500 h-full w-48 text-white no-scrollbar">
+            <div class="flex flex-col">
+                <div class="flex flex-row">
+                    <div class="flex flex-1 bg-stone-600 items-center">
+                        <a class="flex items-center hover:bg-stone-700 h-full transition min-h-[50px]"
+                            onclick="openSideBar('close')" href="javascript:;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-list" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                    d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                            </svg>
+                        </a>
+                        <a id="link-title-sidebar" href="#">
+                            <p id="title-sidebar" class="px-2 text-ellipsis py-2">Title here</p>
+                        </a>
+                    </div>
+                </div>
+                <div id="sidebar-menu" class="py-4"></div>
+            </div>
+        </div>
+        <!-- wrapper (header + content) -->
+        <div id="wrapper-header-content" class="flex flex-col flex-1 min-h-screen ml-48">
+            <!-- navbar -->
+            <nav id="nav" class="h-[50px] bg-stone-200 flex flex-row w-full">
+                <div id="header-menu">
+                    <a class="flex items-center transition hover:bg-stone-600 bg-stone-500 px-3 h-full text-white"
+                        onclick="openSideBar('open')" href="javascript:;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                            class="bi bi-list-ul" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="flex items-center pl-2">
+                    <a href="."><img class="h-10" src="./assets/images/logo.svg" alt="logo" /></a>
+                </div>
+            </nav>
+            <!-- content -->
+            <div id="content" class="flex-1 px-4 py-10 md:px-36 md:py-28 bg-white text-lg md:text-lg">
+                <h1 id="article-title" class="pt-10 md:pt-0 leading-[1.2]">Title of article</h1>
+                <img id="article-image" class="float-right w-full md:w-[350px] pl-3 pb-10 md:pb-0" src="#" />
+                <section id="article" class="leading-[1.6]"></section>
+                <section id="credit" class="text-xs text-gray-400 text-center pt-24 pb-2 leading-5"></section>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="./assets/js/tailwindcss-3.1.8.js"></script>
+<script src="./assets/js/jquery.min.js"></script>
+<script src="./page3.js"></script>
+
+<script>
+    function openSideBar(open) {
+        if (open === 'open') {
+            $('#sidebar').show()
+            $('#header-menu').hide()
+            $('#wrapper-header-content').addClass('ml-48')
+        } else if (open === 'close') {
+            $('#sidebar').hide()
+            $('#header-menu').show()
+            $('#wrapper-header-content').removeClass('ml-48')
+        }
+    }
+
+    function isMobile() {
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            return true
+        } else {
+            false
+        }
+    }
+
+    $(document).ready(async function () {
+        await generateContent(DATA_JSON)
+        await generateSidebarMenu()
+        generateAutoHideNav()
+
+        function generateAutoHideNav() {
+            /* When the user scrolls down, hide the navbar. When the user scrolls up, show the navbar */
+            let prevScrollpos = window.pageYOffset;
+            window.onscroll = function () {
+                let currentScrollPos = window.pageYOffset;
+                if (prevScrollpos > currentScrollPos) {
+                    document.getElementById("nav").style.top = "0";
+                } else if (prevScrollpos > 100) {
+                    document.getElementById("nav").style.top = "-50px";
+                }
+                prevScrollpos = currentScrollPos;
+            }
+        }
+
+        // if mobile phone, close the sidebar by default
+        if (isMobile() === true) {
+            openSideBar('close')
+        } else {
+            openSideBar('open')
+        }
+
+        function generateContent(json) {
+            $('#content #article-title').html(json.title)
+            $('#content #article-image').attr('src', json.image_url)
+            $('#content #article').html(json.article)
+            $('#content #credit').html(json.credit)
+        }
+        function getText(dom) {
+            return $(dom).text()
+        }
+
+        function getId(dom) {
+            return getText(dom).replace(/ /g, '-')
+        }
+
+        function addId(dom) {
+            $(dom).attr('id', getId(dom))
+        }
+
+        function generateSidebarTitle() {
+            if (isMobile() === true) {
+                $('#link-title-sidebar').attr('onclick', " openSideBar('close')")
+            }
+            $('#title-sidebar').html($('#article-title').text())
+        }
+
+        function generateSidebarMenu() {
+            generateSidebarTitle()
+
+            let menu = []
+            // set up H1
+            const listH1 = $('#content h2').toArray()
+            listH1.map(DOMH1 => {
+                addId(DOMH1)
+                menu.push({
+                    h1Text: getText(DOMH1),
+                    h1Id: getId(DOMH1)
+                })
+            })
+
+            // set up H2
+            listH1.map((DOMH1, indexH1) => {
+                menu[indexH1].subMenu = []
+                const listH2 = $('#' + getId(DOMH1)).nextUntil('h2', 'h3').toArray() // after H1, collect H2 list and stop until H1
+                listH2.map(DOMH2 => {
+                    addId(DOMH2)
+                    menu[indexH1].subMenu.push({
+                        h2Text: getText(DOMH2),
+                        h2Id: getId(DOMH2)
+                    })
+                })
+            })
+            setSidebarMenuDOM(menu)
+        }
+
+        function setSidebarMenuDOM(menu = []) {
+            let openSideBarFunc = ''
+            let sideMenuDOM = ''
+            sideMenuDOM = `<ul>`
+            //  if mobile, give hide function
+            if (isMobile() === true) {
+                openSideBarFunc = `onclick="openSideBar('close')"`
+            }
+
+            menu.map(parentMenu => {
+                if (parentMenu.subMenu.length === 0) {
+                    let parentMenuDOM = `<li><a ${openSideBarFunc} class="transition px-3 py-1 border-b border-b-stone-400 block hover:bg-stone-700" href="#${parentMenu.h1Id}">${parentMenu.h1Text}</a></li>`
+                    sideMenuDOM += parentMenuDOM
+                } else {
+                    let parentAndSubMenuDOM = `<li><a ${openSideBarFunc} class="transition px-3 py-1 border-b border-b-stone-400 block hover:bg-stone-700" href="#${parentMenu.h1Id}">${parentMenu.h1Text}</a>`
+                    let subMenuDOM = `<ul class="text-sm border-b border-b-stone-400">`
+                    parentMenu.subMenu.map(subMenu => {
+                        subMenuDOM += `<li><a ${openSideBarFunc} class="transition text-stone-300 px-3 py-1 hover:bg-stone-700 block" href="#${subMenu.h2Id}">${subMenu.h2Text}</a></li>`
+                    })
+                    subMenuDOM += `</ul>`
+                    parentAndSubMenuDOM += subMenuDOM + `</li>`
+                    sideMenuDOM += parentAndSubMenuDOM
+                }
+            })
+            sideMenuDOM += `</ul>`
+            $('#sidebar-menu').html(sideMenuDOM)
+        }
+    })
+</script>
+
+</html>
