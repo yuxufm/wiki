@@ -102,15 +102,28 @@
             await generateSidebarMenu()
 
             generateAutoHideNav()
+
+            // generate ads
+            if (WIKI_GENERATE_ADS == true) {
+                generateAds()
+            }
         }
+
+        // generate ads before H2
+        function generateAds() {
+            const ads = "<div class='bg-gray-200 mt-8 p-5'>ads here</div>"
+            $(ads).insertBefore($("#content h2"))
+        }
+        // end of generate ads
+
 
 
         // ------- API ------- 
         async function getData() {
             // const url = window.location.href
             const pathName = window.location.pathname
-            const url = WIKI_BASE_URL_API + pathName + '.json'
-            // const url = 'http://192.168.0.161:3000/data' // dev only
+            // const url = WIKI_BASE_URL_API + pathName + '.json'
+            const url = 'http://192.168.0.161:3000/data' // dev only
             const res = await fetch(url)
             const resJSON = await res.json()
             return resJSON
