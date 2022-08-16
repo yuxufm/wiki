@@ -5,7 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Wiki</title>
-    <link rel="stylesheet" href="./assets/css/index.css" />
+    <base id="base_url" href="http://192.168.0.161/wiki/" />
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <link rel="stylesheet" href="assets/css/index.css" />
 </head>
 
 <body>
@@ -23,8 +25,8 @@
                                     d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
                             </svg>
                         </a>
-                        <a id="link-title-sidebar" href="#">
-                            <p id="title-sidebar" class="px-2 text-ellipsis py-2">Title here</p>
+                        <a id="link-title-sidebar" href="">
+                            <p id="title-sidebar" class="px-2 text-ellipsis py-2">Loading...</p>
                         </a>
                     </div>
                 </div>
@@ -46,23 +48,24 @@
                     </a>
                 </div>
                 <div class="flex items-center pl-2">
-                    <a href="."><img class="h-10" src="./assets/images/logo.svg" alt="logo" /></a>
+                    <img class="h-10" src="assets/images/logo.svg" alt="logo" />
                 </div>
             </nav>
             <!-- content -->
             <div id="content" class="flex-1 px-4 py-10 md:px-36 md:py-28 bg-white text-lg md:text-lg">
-                <h1 id="article-title" class="pt-10 md:pt-0 leading-[1.2]">Title of article</h1>
+                <h1 id="article-title" class="pt-10 md:pt-0 leading-[1.2]">Loading...</h1>
                 <img id="article-image" class="float-right w-full md:w-[350px] pl-3 pb-10 md:pb-0" src="#" />
                 <section id="article" class="leading-[1.6]"></section>
-                <section id="credit" class="text-xs text-gray-400 text-center pt-24 pb-2 leading-5"></section>
+                <section id="credits" class="text-xs text-gray-400 text-center pt-24 pb-2 leading-5"></section>
             </div>
         </div>
     </div>
 </body>
 
-<script src="./assets/js/tailwindcss-3.1.8.js"></script>
-<script src="./assets/js/jquery.min.js"></script>
-<script src="./page3.js"></script>
+<script src="assets/js/tailwindcss-3.1.8.js"></script>
+<script src="assets/js/jquery.min.js"></script>
+<script src="config.js"></script>
+
 
 <script>
     function openSideBar(open) {
@@ -86,9 +89,35 @@
     }
 
     $(document).ready(async function () {
-        await generateContent(DATA_JSON)
-        await generateSidebarMenu()
-        generateAutoHideNav()
+
+        // main
+        main()
+
+        async function main() {
+            // get API data
+            const JSON_DATA = await getData()
+
+            // generate data to content
+            await generateContent(JSON_DATA)
+            await generateSidebarMenu()
+
+            generateAutoHideNav()
+        }
+
+
+        // ------- API ------- 
+        async function getData() {
+            // const url = window.location.href
+            const pathName = window.location.pathname
+            const url = WIKI_BASE_URL_API + pathName + '.json'
+            // const url = 'http://192.168.0.161:3000/data' // dev only
+            const res = await fetch(url)
+            const resJSON = await res.json()
+            return resJSON
+        }
+        // ------- end of API ------- 
+
+
 
         function generateAutoHideNav() {
             /* When the user scrolls down, hide the navbar. When the user scrolls up, show the navbar */
@@ -115,7 +144,7 @@
             $('#content #article-title').html(json.title)
             $('#content #article-image').attr('src', json.image_url)
             $('#content #article').html(json.article)
-            $('#content #credit').html(json.credit)
+            $('#content #credits').html(json.credits)
         }
         function getText(dom) {
             return $(dom).text()
@@ -130,9 +159,11 @@
         }
 
         function generateSidebarTitle() {
+            const url = window.location.pathname
             if (isMobile() === true) {
                 $('#link-title-sidebar').attr('onclick', " openSideBar('close')")
             }
+            $('#link-title-sidebar').attr('href', url + '#')
             $('#title-sidebar').html($('#article-title').text())
         }
 
@@ -166,6 +197,7 @@
         }
 
         function setSidebarMenuDOM(menu = []) {
+            const url = window.location.pathname
             let openSideBarFunc = ''
             let sideMenuDOM = ''
             sideMenuDOM = `<ul>`
@@ -176,13 +208,13 @@
 
             menu.map(parentMenu => {
                 if (parentMenu.subMenu.length === 0) {
-                    let parentMenuDOM = `<li><a ${openSideBarFunc} class="transition px-3 py-1 border-b border-b-stone-400 block hover:bg-stone-700" href="#${parentMenu.h1Id}">${parentMenu.h1Text}</a></li>`
+                    let parentMenuDOM = `<li><a ${openSideBarFunc} class="transition px-3 py-1 border-b border-b-stone-400 block hover:bg-stone-700" href="${url}#${parentMenu.h1Id}">${parentMenu.h1Text}</a></li>`
                     sideMenuDOM += parentMenuDOM
                 } else {
-                    let parentAndSubMenuDOM = `<li><a ${openSideBarFunc} class="transition px-3 py-1 border-b border-b-stone-400 block hover:bg-stone-700" href="#${parentMenu.h1Id}">${parentMenu.h1Text}</a>`
+                    let parentAndSubMenuDOM = `<li><a ${openSideBarFunc} class="transition px-3 py-1 border-b border-b-stone-400 block hover:bg-stone-700" href="${url}#${parentMenu.h1Id}">${parentMenu.h1Text}</a>`
                     let subMenuDOM = `<ul class="text-sm border-b border-b-stone-400">`
                     parentMenu.subMenu.map(subMenu => {
-                        subMenuDOM += `<li><a ${openSideBarFunc} class="transition text-stone-300 px-3 py-1 hover:bg-stone-700 block" href="#${subMenu.h2Id}">${subMenu.h2Text}</a></li>`
+                        subMenuDOM += `<li><a ${openSideBarFunc} class="transition text-stone-300 px-3 py-1 hover:bg-stone-700 block" href="${url}#${subMenu.h2Id}">${subMenu.h2Text}</a></li>`
                     })
                     subMenuDOM += `</ul>`
                     parentAndSubMenuDOM += subMenuDOM + `</li>`
